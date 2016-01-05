@@ -20,6 +20,7 @@ public:
     static QString workspace;
     static bool outdatedTraining;
     static bool outdatedProtocols;
+    static bool outdatedSchedules;
     static void copyPath(QString src, QString dst);
     
 private slots:    
@@ -37,10 +38,16 @@ private slots:
     
     void on_actionRun_On_Start_toggled(bool active);
     
+    void on_actionAdd_New_Category_triggered();
+
+    void on_actionLegacy_Schedule_Logs_triggered();
+
 signals:
     void staffMemberAdded(QString name);
+    void categoryAdded(QString name);
     void workspaceChanged();
     void trainingFileLoadRequest(QString name);    
+    void schedulesFileLoadRequest(QString name);
     void protocolFileLoadRequest(QString name);    
     
 private:

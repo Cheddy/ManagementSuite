@@ -17,12 +17,15 @@ RC_FILE = app.rc
 SOURCES += main.cpp\
         mainwindow.cpp \
     trainingoverview.cpp \
-    protocoloverview.cpp
+    protocoloverview.cpp \
+    scheduletab.cpp
 
 HEADERS  += mainwindow.h \
     trainingoverview.h \
-    protocoloverview.h
+    protocoloverview.h \
+    scheduletab.h
 
 FORMS    += mainwindow.ui \
     trainingoverview.ui \
-    protocoloverview.ui
+    protocoloverview.ui \
+    scheduletab.ui

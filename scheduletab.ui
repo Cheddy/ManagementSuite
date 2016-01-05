@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TrainingOverview</class>
- <widget class="QWidget" name="TrainingOverview">
+ <class>ScheduleTab</class>
+ <widget class="QWidget" name="ScheduleTab">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -20,21 +20,16 @@
       <bool>true</bool>
      </property>
      <property name="columnCount">
-      <number>8</number>
+      <number>6</number>
      </property>
      <column>
       <property name="text">
+       <string>Category</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Course</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Priority</string>
       </property>
      </column>
      <column>
@@ -44,12 +39,7 @@
      </column>
      <column>
       <property name="text">
-       <string>Score (If Applicable)</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Last Taken</string>
+       <string>Date Completed</string>
       </property>
      </column>
      <column>
@@ -86,9 +76,12 @@
       </item>
       <item row="1" column="0">
        <widget class="QComboBox" name="nameSelectorBox">
+        <property name="currentText">
+         <string>All Categories</string>
+        </property>
         <item>
          <property name="text">
-          <string extracomment="Show all records">All Staff</string>
+          <string extracomment="Show all records">All Categories</string>
          </property>
         </item>
        </widget>
@@ -109,7 +102,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Add New Training</string>
+         <string>Add New Item</string>
         </property>
         <property name="shortcut">
          <string>Ctrl+N</string>

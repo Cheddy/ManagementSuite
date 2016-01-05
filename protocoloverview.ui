@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>575</width>
+    <width>696</width>
     <height>300</height>
    </rect>
   </property>
@@ -128,7 +128,7 @@
       </column>
       <column>
        <property name="text">
-        <string>Renewal Period</string>
+        <string>Renewal Period (Months)</string>
        </property>
       </column>
       <column>

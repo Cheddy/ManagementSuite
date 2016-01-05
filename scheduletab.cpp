@@ -1,5 +1,5 @@
-#include "trainingoverview.h"
-#include "ui_trainingoverview.h"
+#include "scheduletab.h"
+#include "ui_scheduletab.h"
 #include <QtCore>
 #include <QtPrintSupport/QPrinter>
 #include <QtPrintSupport/QPrintDialog>
@@ -9,22 +9,22 @@
 #include "mainwindow.h"
 
 
-TrainingOverview::TrainingOverview(QWidget *parent) :
+ScheduleTab::ScheduleTab(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::TrainingOverview)
+    ui(new Ui::ScheduleTab)
 {
     ui->setupUi(this);
     ui->trainingTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     connect(ui->trainingTable->model(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(onDataChanged(const QModelIndex&, const QModelIndex&)));
-    loadSavedTraining(MainWindow::workspace + "/training.csv");    
+    loadSavedTraining(MainWindow::workspace + "/schedules.csv");
 }
 
-TrainingOverview::~TrainingOverview()
+ScheduleTab::~ScheduleTab()
 {
     delete ui;
 }
 
-void TrainingOverview::on_addTrainingButton_clicked()
+void ScheduleTab::on_addTrainingButton_clicked()
 {
     ui->trainingTable->insertRow(0);
     
@@ -44,54 +44,54 @@ void TrainingOverview::on_addTrainingButton_clicked()
     item->setFlags(item->flags() & ~Qt::ItemIsEditable);
     ui->trainingTable->setSortingEnabled(false);
     ui->trainingTable->setItem(0,0,name);
-    ui->trainingTable->setItem(0,5,lastTaken);    
-    ui->trainingTable->setItem(0,6,renewalPeriod);        
-    ui->trainingTable->setItem(0,7,item);
+    ui->trainingTable->setItem(0,3,lastTaken);
+    ui->trainingTable->setItem(0,4,renewalPeriod);
+    ui->trainingTable->setItem(0,5,item);
     recalculateRow(0);    
     ui->trainingTable->setSortingEnabled(true);    
     ui->trainingTable->repaint();
 }
 
-void TrainingOverview::onDataChanged(const QModelIndex& previous, const QModelIndex& current)
+void ScheduleTab::onDataChanged(const QModelIndex& previous, const QModelIndex& current)
 {
-    if(ui->trainingTable->item(previous.row(), 5) != NULL && ui->trainingTable->item(previous.row(), 6) != NULL && (previous.column() == 6 || previous.column() == 5)){
+    if(ui->trainingTable->item(previous.row(), 3) != NULL && ui->trainingTable->item(previous.row(), 4) != NULL && (previous.column() == 4 || previous.column() == 3)){
         recalculateRow(previous.row());       
     }
 }
 
-void TrainingOverview::recalculateRow(int row)
+void ScheduleTab::recalculateRow(int row)
 {
-    if(ui->trainingTable->item(row, 5) != NULL && ui->trainingTable->item(row, 6) != NULL){
+    if(ui->trainingTable->item(row, 3) != NULL && ui->trainingTable->item(row, 4) != NULL){
         ui->trainingTable->setSortingEnabled(false);
-        if(ui->trainingTable->item(row, 7) == NULL){
+        if(ui->trainingTable->item(row, 5) == NULL){
             QDate currentDate = QDate::currentDate();    
             QTableWidgetItem *item = new QTableWidgetItem(currentDate.toString("dd/MM/yyyy"),QTableWidgetItem::Type);
             item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-            ui->trainingTable->setItem(row, 7, item);
+            ui->trainingTable->setItem(row, 5, item);
         }
-        ui->trainingTable->item(row,7)->setData(Qt::EditRole, ui->trainingTable->item(row, 5)->data(Qt::EditRole).toDate().addMonths(ui->trainingTable->item(row, 6)->data(Qt::EditRole).toInt()));
-        if(ui->trainingTable->item(row,7)->data(Qt::EditRole).toDate() < QDate::currentDate()){
-            ui->trainingTable->item(row,7)->setBackgroundColor(QColor(255,0,0));
-        }else if (ui->trainingTable->item(row,7)->data(Qt::EditRole).toDate() < QDate::currentDate().addMonths(1)){
-            ui->trainingTable->item(row,7)->setBackgroundColor(QColor(255,255,0));            
+        ui->trainingTable->item(row,5)->setData(Qt::EditRole, ui->trainingTable->item(row, 3)->data(Qt::EditRole).toDate().addMonths(ui->trainingTable->item(row, 4)->data(Qt::EditRole).toInt()));
+        if(ui->trainingTable->item(row,5)->data(Qt::EditRole).toDate() < QDate::currentDate()){
+            ui->trainingTable->item(row,5)->setBackgroundColor(QColor(255,0,0));
+        }else if (ui->trainingTable->item(row,5)->data(Qt::EditRole).toDate() < QDate::currentDate().addMonths(1)){
+            ui->trainingTable->item(row,5)->setBackgroundColor(QColor(255,255,0));
         }else{
-            ui->trainingTable->item(row,7)->setBackgroundColor(QColor(0,255,0));            
+            ui->trainingTable->item(row,5)->setBackgroundColor(QColor(0,255,0));
         }
         ui->trainingTable->repaint(); 
         ui->trainingTable->setSortingEnabled(true);        
     }
 }
 
-void TrainingOverview::on_deleteTrainingButton_clicked()
+void ScheduleTab::on_deleteTrainingButton_clicked()
 {
     while(!ui->trainingTable->selectionModel()->selectedIndexes().isEmpty()){
         ui->trainingTable->removeRow(ui->trainingTable->selectionModel()->selectedIndexes().first().row());
     }
 }
 
-void TrainingOverview::on_saveTrainingButton_clicked()
+void ScheduleTab::on_saveTrainingButton_clicked()
 {
-    QFile f(MainWindow::workspace + "/training.csv");
+    QFile f(MainWindow::workspace + "/schedules.csv");
     if (f.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
     {
         QTextStream data( &f );
@@ -114,7 +114,7 @@ void TrainingOverview::on_saveTrainingButton_clicked()
     
 }
 
-void TrainingOverview::loadSavedTraining(QString path)
+void ScheduleTab::loadSavedTraining(QString path)
 {
     QFile f(path);
     if (f.open(QIODevice::ReadWrite))
@@ -130,19 +130,19 @@ void TrainingOverview::loadSavedTraining(QString path)
                     for(int col =0; col < lineData.size(); col++){
                         if(lineData.at(col) != NULL){
                             QTableWidgetItem *item; 
-                            if(col == 5){
+                            if(col == 3){
                                 QDate date = QDate::fromString(lineData.at(col), "yyyy-MM-dd");
                                 item = new QTableWidgetItem(date.toString("dd/MM/yyyy"),QTableWidgetItem::Type);
                                 item->setData(Qt::DisplayRole, date);                                
                                 item->setData(Qt::EditRole, date);    
-                            }else if(col == 6){
+                            }else if(col == 4){
                                 item = new QTableWidgetItem(QTableWidgetItem::Type);   
                                 item->setData(Qt::DisplayRole, lineData.at(col).toInt());                                
                                 item->setData(Qt::EditRole, lineData.at(col).toInt());                                
                             }else{
                                 item = new QTableWidgetItem(lineData.at(col),QTableWidgetItem::Type);                            
                             }
-                            if(col == 0 || col == 7){
+                            if(col == 0 || col == 5){
                                 item->setFlags(item->flags() & ~Qt::ItemIsEditable);               
                                 if(col == 0){
                                     names << lineData.at(col);
@@ -163,16 +163,16 @@ void TrainingOverview::loadSavedTraining(QString path)
     if(QApplication::arguments().length() > 1 && QApplication::arguments().at(1) == "/boot"){
         QDate date = QDate::currentDate().addMonths(1);
         for(int i = 0; i < ui->trainingTable->rowCount(); i++){
-            if(ui->trainingTable->item(i, 7)->data(Qt::EditRole).toDate() < date){
-                MainWindow::outdatedTraining = true;
+            if(ui->trainingTable->item(i, 5)->data(Qt::EditRole).toDate() < date){
+                MainWindow::outdatedSchedules = true;
             }
         }
     }
 }
 
-void TrainingOverview::on_nameSelectorBox_currentIndexChanged(const QString &name)
+void ScheduleTab::on_nameSelectorBox_currentIndexChanged(const QString &name)
 {
-    if(name == QString("All Staff")){
+    if(name == QString("All Categories")){
         ui->addTrainingButton->setEnabled(false);
     }else{
         ui->addTrainingButton->setEnabled(true);
@@ -180,7 +180,7 @@ void TrainingOverview::on_nameSelectorBox_currentIndexChanged(const QString &nam
     
     for(int i = 0; i < ui->trainingTable->rowCount(); i++){
         QTableWidgetItem *item = ui->trainingTable->item(i, 0);
-        if(name == QString("All Staff")){
+        if(name == QString("All Categories")){
             ui->trainingTable->setRowHidden(i, false);            
         }else{
             if(item != NULL && item->text() == name){
@@ -192,17 +192,17 @@ void TrainingOverview::on_nameSelectorBox_currentIndexChanged(const QString &nam
     }
 }
 
-void TrainingOverview::on_addStaffMember(QString name){
+void ScheduleTab::on_addCategory(QString name){
     if(ui->nameSelectorBox->findText(name) < 0){
         ui->nameSelectorBox->addItem(name);
         ui->nameSelectorBox->setCurrentText(name);
     }else{
-        std::cerr << "Staff already exists!" << std::endl;
+        std::cerr << "Category already exists!" << std::endl;
         ui->nameSelectorBox->setCurrentText(name);        
     }
 }
 
-void TrainingOverview::on_printButton_clicked()
+void ScheduleTab::on_printButton_clicked()
 {
     QString strStream;
     QTextStream out(&strStream);
@@ -213,7 +213,7 @@ void TrainingOverview::on_printButton_clicked()
     out <<  "<html>\n"
             "<head>\n"
             "<meta Content=\"Text/html; charset=Windows-1251\">\n"
-         <<  QString("<title>%1</title>\n").arg("Training Table")
+         <<  QString("<title>%1</title>\n").arg("Schedule Table")
           <<  "</head>\n"
               "<body bgcolor=#ffffff link=#5000A0>\n"
               "<style>\n"
@@ -269,19 +269,19 @@ void TrainingOverview::on_printButton_clicked()
     delete document;
 }
 
-void TrainingOverview::on_workspaceChanged()
+void ScheduleTab::on_workspaceChanged()
 {
     ui->trainingTable->clearContents();
     ui->trainingTable->setRowCount(0);    
-    loadSavedTraining(MainWindow::workspace + "/training.csv");
+    loadSavedTraining(MainWindow::workspace + "/schedules.csv");
 }  
 
-void TrainingOverview::on_requestLoadTrainingFile(QString name)
+void ScheduleTab::on_requestLoadTrainingFile(QString name)
 {
     importLegacyLog(name);
 }
 
-void TrainingOverview::importLegacyLog(QString path)
+void ScheduleTab::importLegacyLog(QString path)
 {
     QFile f(path);
     QFileInfo fileInfo(f.fileName());
@@ -296,18 +296,18 @@ void TrainingOverview::importLegacyLog(QString path)
                 if(lines.at(row) != NULL){
                     ui->trainingTable->insertRow(row);                    
                     QStringList lineData = lines.at(row).split(QString(","));
-                    for(int col =0; col < lineData.size() + 1; col++){
-                        if(col == 0 || col == 5 || col == 6 || lineData.at(col - 1) != NULL){
+                    for(int col =0; col < 6; col++){
+                        if(col == 0 || col == 3 || col == 4 || lineData.at(col - 1) != NULL){
                             QTableWidgetItem *item; 
-                            if(col == 5){
-                                QDate date = QDate::fromString(lineData.at(col - 1), "dd-MM-yyyy");
+                            if(col == 3){
+                                QDate date = QDate::fromString(lineData.at(5), "dd-MM-yyyy");
                                 if(date.isNull() || !date.isValid())
                                     date = QDate::fromString("01-01-2000", "dd-MM-yyyy");
                                 item = new QTableWidgetItem(QTableWidgetItem::Type);
                                 item->setData(Qt::DisplayRole, date);                                
                                 item->setData(Qt::EditRole, date);    
-                            }else if(col == 6){
-                                QString tmp = lineData.at(col - 1);
+                            }else if(col == 4){
+                                QString tmp = lineData.at(6);
                                 tmp.remove(QRegExp("[^0-9]"));
                                 if(tmp.isEmpty())
                                     tmp = QString("0");
@@ -316,10 +316,12 @@ void TrainingOverview::importLegacyLog(QString path)
                                 item->setData(Qt::EditRole, tmp.toInt());                                
                             }else if(col == 0){
                                 item = new QTableWidgetItem(name,QTableWidgetItem::Type);                            
+                            }else if(col == 2){
+                                item = new QTableWidgetItem(lineData.at(3),QTableWidgetItem::Type);
                             }else{
-                                item = new QTableWidgetItem(lineData.at(col - 1),QTableWidgetItem::Type);                            
+                                item = new QTableWidgetItem(lineData.at(1),QTableWidgetItem::Type);
                             }
-                            if(col == 0 || col == 7){
+                            if(col == 0 || col == 5){
                                 item->setFlags(item->flags() & ~Qt::ItemIsEditable);               
                                 if(col == 0){
                                     names << name;

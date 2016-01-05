@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "trainingoverview.h"
 #include "protocoloverview.h"
+#include "scheduletab.h"
 #include <QtCore>
 #include <QInputDialog>
 #include <QComboBox>
@@ -11,6 +12,7 @@
 QString MainWindow::workspace("");
 bool MainWindow::outdatedTraining = false;
 bool MainWindow::outdatedProtocols = false;
+bool MainWindow::outdatedSchedules = false;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -27,25 +29,33 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("Management Suite [" + MainWindow::workspace + "]");
     TrainingOverview *overview = new TrainingOverview();
     ProtocolOverview *protocols = new ProtocolOverview();
+    ScheduleTab *schedules = new ScheduleTab();
     tabList << overview;
     tabList << protocols;
-    ui->tabWidget-> addTab(tabList.first(), "Training Manager");  
-    ui->tabWidget-> addTab(tabList.back(), "Protocol Manager");   
+    tabList << schedules;
+    ui->tabWidget->addTab(tabList.at(0), "Training Manager");
+    ui->tabWidget->addTab(tabList.at(1), "Protocol Manager");
+    ui->tabWidget->addTab(tabList.at(2), "Schedule Manager");
     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
     if(settings.contains("Management Suite")){
         ui->actionRun_On_Start->setChecked(true);
     }    
     writePropertiesFile();
-    connect(this, SIGNAL(staffMemberAdded(QString)), overview, SLOT(on_addStaffMember(QString)));        
-    connect(this, SIGNAL(workspaceChanged()), overview, SLOT(on_workspaceChanged()));        
+    connect(this, SIGNAL(staffMemberAdded(QString)), overview, SLOT(on_addStaffMember(QString)));
+    connect(this, SIGNAL(categoryAdded(QString)), schedules, SLOT(on_addCategory(QString)));
+    connect(this, SIGNAL(workspaceChanged()), overview, SLOT(on_workspaceChanged()));
+    connect(this, SIGNAL(workspaceChanged()), schedules, SLOT(on_workspaceChanged()));
     connect(this, SIGNAL(workspaceChanged()), protocols, SLOT(on_workspaceChanged()));        
     connect(this, SIGNAL(trainingFileLoadRequest(QString)), overview, SLOT(on_requestLoadTrainingFile(QString)));        
+    connect(this, SIGNAL(schedulesFileLoadRequest(QString)), schedules, SLOT(on_requestLoadTrainingFile(QString)));
     connect(this, SIGNAL(protocolFileLoadRequest(QString)), protocols, SLOT(on_requestLoadProtocolFile(QString))); 
     if(QApplication::arguments().length() > 1 && QApplication::arguments().at(1) == "/boot"){    
         if(outdatedTraining){
             ui->tabWidget->setCurrentWidget(overview);
         }else if(outdatedProtocols){
             ui->tabWidget->setCurrentWidget(protocols);            
+        }else if(outdatedSchedules){
+            ui->tabWidget->setCurrentWidget(schedules);
         }else{
             exit(0);
         }
@@ -143,5 +153,21 @@ void MainWindow::on_actionRun_On_Start_toggled(bool active)
         settings.setValue("Management Suite", "\"" + QApplication::applicationFilePath().replace("/","\\") +  "\" /boot");
     }else{
         settings.remove("Management Suite");
+    }
+}
+
+void MainWindow::on_actionAdd_New_Category_triggered()
+{
+    bool ok;
+    QString text = QInputDialog::getText(this, QString("Add Category"),QString("Category Name:"), QLineEdit::Normal, QString(""), &ok);
+    if (ok && !text.isEmpty())
+        emit categoryAdded(text);
+}
+
+void MainWindow::on_actionLegacy_Schedule_Logs_triggered()
+{
+    QStringList list = QFileDialog::getOpenFileNames(this, QString("Select Schedule Logs To Import"),QString("/home"));
+    foreach(QString s, list){
+        emit schedulesFileLoadRequest(s);
     }
 }

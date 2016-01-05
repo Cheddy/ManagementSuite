@@ -135,7 +135,7 @@ void ProtocolOverview::recalculateRow(int row)
             item->setFlags(item->flags() & ~Qt::ItemIsEditable);
             ui->protocolTable->setItem(row, 3, item);
         }
-        ui->protocolTable->item(row,3)->setData(Qt::EditRole, ui->protocolTable->item(row, 1)->data(Qt::EditRole).toDate().addYears(ui->protocolTable->item(row, 2)->data(Qt::EditRole).toInt()));
+        ui->protocolTable->item(row,3)->setData(Qt::EditRole, ui->protocolTable->item(row, 1)->data(Qt::EditRole).toDate().addMonths(ui->protocolTable->item(row, 2)->data(Qt::EditRole).toInt()));
         if(ui->protocolTable->item(row,3)->data(Qt::EditRole).toDate() < QDate::currentDate()){
             ui->protocolTable->item(row,3)->setBackgroundColor(QColor(255,0,0));
         }else if (ui->protocolTable->item(row,3)->data(Qt::EditRole).toDate() < QDate::currentDate().addMonths(1)){
@@ -210,7 +210,7 @@ void ProtocolOverview::loadSavedProtocols()
                                 item->setData(Qt::DisplayRole, date);                                
                                 item->setData(Qt::EditRole, date);    
                             }else if(col == 2){
-                                item = new QTableWidgetItem(lineData.at(col),QTableWidgetItem::Type);   
+                                item = new QTableWidgetItem(QTableWidgetItem::Type);
                                 item->setData(Qt::DisplayRole, lineData.at(col).toInt());                                
                                 item->setData(Qt::EditRole, lineData.at(col).toInt());                                
                             }else{
